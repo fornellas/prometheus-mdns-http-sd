@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/fornellas/prometheus-mdns-http-sd/cli/lib"
@@ -70,9 +69,10 @@ func NewServer(
 					fmt.Sprintf("%v:%d", ip, entry.Port),
 				},
 				Labels: map[string]string{
-					"__instance": fmt.Sprintf("%s:%d", strings.TrimRight(entry.Host, "."), entry.Port),
-					"name":       entry.Name,
-					"info":       entry.Info,
+					"host": entry.Host,
+					"port": fmt.Sprintf("%d", entry.Port),
+					"name": entry.Name,
+					"info": entry.Info,
 				},
 			})
 		}
