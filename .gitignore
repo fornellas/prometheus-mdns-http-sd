@@ -1,0 +1,6 @@
+/.cache/
+/cover.html
+/cover.lcov
+/cover.txt
+/go_build_template.*.*
+/version/.version
