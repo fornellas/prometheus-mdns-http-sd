@@ -11,9 +11,9 @@ import (
 	"github.com/fornellas/prometheus-mdns-http-sd/mdns"
 )
 
-type Target struct {
-	Target string            `json:"target"`
-	Labels map[string]string `json:"labels"`
+type Targets struct {
+	Targets []string          `json:"targets"`
+	Labels  map[string]string `json:"labels"`
 }
 
 func NewServer(
@@ -49,11 +49,13 @@ func NewServer(
 			return
 		}
 
-		var targets []Target
+		var targetsList []Targets
 		for _, entry := range entries {
 
-			targets = append(targets, Target{
-				Target: fmt.Sprintf("%s:%d", strings.TrimRight(entry.Host, "."), entry.Port),
+			targetsList = append(targetsList, Targets{
+				Targets: []string{
+					fmt.Sprintf("%s:%d", strings.TrimRight(entry.Host, "."), entry.Port),
+				},
 				Labels: map[string]string{
 					"name": entry.Name,
 					"info": entry.Info,
@@ -61,7 +63,7 @@ func NewServer(
 			})
 		}
 
-		jsonData, err := json.Marshal(targets)
+		jsonData, err := json.Marshal(targetsList)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			fmt.Fprintf(w, "Error marshalling JSON: %v", err)
