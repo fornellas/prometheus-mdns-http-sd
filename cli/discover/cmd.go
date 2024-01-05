@@ -46,7 +46,6 @@ var Cmd = &cobra.Command{
 }
 
 func Reset() {
-
 }
 
 func init() {
