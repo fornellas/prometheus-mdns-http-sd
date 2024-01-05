@@ -6,6 +6,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 
+	"github.com/fornellas/prometheus-mdns-http-sd/cli/discover"
 	"github.com/fornellas/prometheus-mdns-http-sd/cli/lib"
 	"github.com/fornellas/prometheus-mdns-http-sd/cli/version"
 	"github.com/fornellas/prometheus-mdns-http-sd/log"
@@ -58,6 +59,9 @@ func init() {
 		&forceColor, "force-color", "", defaultForceColor,
 		"Force colored output",
 	)
+
+	Cmd.AddCommand(discover.Cmd)
+	resetFuncs = append(resetFuncs, discover.Reset)
 
 	Cmd.AddCommand(version.Cmd)
 	resetFuncs = append(resetFuncs, version.Reset)
