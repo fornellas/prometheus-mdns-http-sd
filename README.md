@@ -15,7 +15,25 @@ Pick the [latest release](https://github.com/fornellas/prometheus-mdns-http-sd/r
 
 ```bash
 GOARCH=$(case $(uname -m) in i[23456]86) echo 386;; x86_64) echo amd64;; armv6l|armv7l) echo arm;; aarch64) echo arm64;; *) echo Unknown machine $(uname -m) 1>&2 ; exit 1 ;; esac) && wget -O- https://github.com/fornellas/prometheus-mdns-http-sd/releases/latest/download/prometheus-mdns-http-sd.linux.$GOARCH.gz | gunzip > prometheus-mdns-http-sd && chmod 755 prometheus-mdns-http-sd
-./prometheus-mdns-http-sd --help
+./prometheus-mdns-http-sd server
+```
+
+You can setup you Prometheus like this:
+
+```yaml
+- job_name: 'my_job'
+  http_sd_configs:
+    - url: http://127.0.0.1:2431/targets
+      refresh_interval: 15s
+  metric_relabel_configs:
+    # Prometheus is not capable of resolving mDNS, so after scraping is done
+    # using the IP address, we use relabeling here to set the "real" instance
+    # value
+    - source_labels: [host,port]
+      separator: ":"
+      target_label: instance
+    - regex: "^host|port$"
+      action: labeldrop
 ```
 
 ## Development
