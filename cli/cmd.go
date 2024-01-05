@@ -6,9 +6,9 @@ import (
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 
-	"github.com/fornellas/go_build_template/cli/lib"
-	"github.com/fornellas/go_build_template/cli/version"
-	"github.com/fornellas/go_build_template/log"
+	"github.com/fornellas/prometheus-mdns-http-sd/cli/lib"
+	"github.com/fornellas/prometheus-mdns-http-sd/cli/version"
+	"github.com/fornellas/prometheus-mdns-http-sd/log"
 )
 
 var ExitFunc func(int) = func(code int) { os.Exit(code) }
@@ -19,8 +19,8 @@ var forceColor bool
 var defaultForceColor = false
 
 var Cmd = &cobra.Command{
-	Use:   "go_build_template",
-	Short: "Go Build Tempmlate.",
+	Use:   "prometheus-mdns-http-sd",
+	Short: "Prometheus HTTP mDNS Service Discovery.",
 	Args:  cobra.NoArgs,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		if forceColor {

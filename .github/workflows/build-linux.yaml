@@ -7,7 +7,7 @@ on:
         type: string
     outputs:
       artifact:
-        value: go_build_template.linux.${{ inputs.GOARCH }}.gz
+        value: prometheus-mdns-http-sd.linux.${{ inputs.GOARCH }}.gz
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -35,7 +35,7 @@ jobs:
       - name: Build
         run: |
           DOCKER_PLATFORM=linux/${{ inputs.GOARCH }} ./build.sh ci GOOS=linux GOARCH=${{ inputs.GOARCH }}  V=1
-          gzip go_build_template.linux.${{ inputs.GOARCH }}
+          gzip prometheus-mdns-http-sd.linux.${{ inputs.GOARCH }}
         shell: bash
       # Git Status
       - name: git status
@@ -52,8 +52,8 @@ jobs:
       # Upload
       - uses: actions/upload-artifact@v3
         with:
-          name: go_build_template.linux.${{ inputs.GOARCH }}.gz
-          path: go_build_template.linux.${{ inputs.GOARCH }}.gz
+          name: prometheus-mdns-http-sd.linux.${{ inputs.GOARCH }}.gz
+          path: prometheus-mdns-http-sd.linux.${{ inputs.GOARCH }}.gz
           if-no-files-found: error
       # Coveralls
       - name: Coveralls

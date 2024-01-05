@@ -82,7 +82,7 @@ jobs:
         # https://pkg.go.dev/about#adding-a-package
         run: |
           set -e
-          curl -v https://proxy.golang.org/github.com/fornellas/go_build_template/@v/$(git describe --tags).info
+          curl -v https://proxy.golang.org/github.com/fornellas/prometheus-mdns-http-sd/@v/$(git describe --tags).info
         shell: bash
   coveralls:
     needs:

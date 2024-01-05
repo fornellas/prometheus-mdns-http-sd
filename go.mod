@@ -1,6 +1,6 @@
-module github.com/fornellas/go_build_template
+module github.com/fornellas/prometheus-mdns-http-sd
 
-go 1.20
+go 1.21
 
 require (
 	github.com/fatih/color v1.16.0

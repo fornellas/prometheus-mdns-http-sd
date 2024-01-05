@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/fornellas/go_build_template/cli"
+	"github.com/fornellas/prometheus-mdns-http-sd/cli"
 )
 
 func main() {

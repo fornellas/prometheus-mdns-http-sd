@@ -5,7 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/fornellas/go_build_template/version"
+	"github.com/fornellas/prometheus-mdns-http-sd/version"
 )
 
 var Cmd = &cobra.Command{
