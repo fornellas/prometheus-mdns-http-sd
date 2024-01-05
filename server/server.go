@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 	"fmt"
+	"net"
 	"net/http"
 	"strings"
 	"time"
@@ -51,14 +52,27 @@ func NewServer(
 
 		var targetsList []Targets
 		for _, entry := range entries {
+			var ip *net.IP
+			if entry.AddrV4 != nil {
+				ip = &entry.AddrV4
+			}
+			if entry.AddrV6 != nil {
+				ip = &entry.AddrV6
+			}
+			if ip == nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				fmt.Fprintf(w, "Discovered service has no IP: %v", entry)
+				return
+			}
 
 			targetsList = append(targetsList, Targets{
 				Targets: []string{
-					fmt.Sprintf("%s:%d", strings.TrimRight(entry.Host, "."), entry.Port),
+					fmt.Sprintf("%v:%d", ip, entry.Port),
 				},
 				Labels: map[string]string{
-					"name": entry.Name,
-					"info": entry.Info,
+					"__instance": fmt.Sprintf("%s:%d", strings.TrimRight(entry.Host, "."), entry.Port),
+					"name":       entry.Name,
+					"info":       entry.Info,
 				},
 			})
 		}
