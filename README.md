@@ -29,10 +29,10 @@ You can setup you Prometheus like this:
     # Prometheus is not capable of resolving mDNS, so after scraping is done
     # using the IP address, we use relabeling here to set the "real" instance
     # value
-    - source_labels: [host,port]
+    - source_labels: [mdns_host,mdns_port]
       separator: ":"
       target_label: instance
-    - regex: "^host|port$"
+    - regex: "^mdns_host|mdns_port$"
       action: labeldrop
 ```
 

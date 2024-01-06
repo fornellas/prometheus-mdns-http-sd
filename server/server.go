@@ -69,10 +69,10 @@ func NewServer(
 					fmt.Sprintf("%v:%d", ip, entry.Port),
 				},
 				Labels: map[string]string{
-					"host": entry.Host,
-					"port": fmt.Sprintf("%d", entry.Port),
-					"name": entry.Name,
-					"info": entry.Info,
+					"mdns_host": entry.Host,
+					"mdns_port": fmt.Sprintf("%d", entry.Port),
+					"mdns_name": entry.Name,
+					"mdns_info": entry.Info,
 				},
 			})
 		}
