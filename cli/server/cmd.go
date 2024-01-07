@@ -30,7 +30,6 @@ var Cmd = &cobra.Command{
 			lib.Service,
 			lib.Domain,
 			lib.Timeout,
-			lib.WantUnicastResponse,
 			lib.DisableIPv4,
 			lib.DisableIPv6,
 		)

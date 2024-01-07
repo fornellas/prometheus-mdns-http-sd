@@ -15,32 +15,39 @@ var Cmd = &cobra.Command{
 	Short: "Runs mDNS discovery and print results.",
 	Args:  cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
-		entries, err := mdns.Query(
+		m := mdns.NewMDNS()
+
+		proto := mdns.ProtoAny
+		if lib.DisableIPv4 {
+			proto = mdns.ProtoInet6
+		}
+		if lib.DisableIPv6 {
+			proto = mdns.ProtoInet
+		}
+
+		services, err := m.BrowseServices(
 			lib.InterfaceStr,
+			proto,
 			lib.Service,
 			lib.Domain,
 			lib.Timeout,
-			lib.WantUnicastResponse,
-			lib.DisableIPv4,
-			lib.DisableIPv6,
 		)
 		if err != nil {
 			logrus.Fatalf("Error querying mDNS: %v", err)
 		}
 
-		for _, entry := range entries {
+		for _, service := range services {
 			fmt.Printf(
-				"%s\n  Host: %s\n  AddrV4: %v\n  AddrV6: %v\n  Port: %v\n  Info: %v\n  InfoFields:\n",
-				entry.Name,
-				entry.Host,
-				entry.AddrV4,
-				entry.AddrV6,
-				entry.Port,
-				entry.Info,
+				"%s\n  Type: %v\n  Interface: %v\n  Host: %v\n  Domain: %v\n  IP: %v\n  Port: %v\n  Protocol: %v\n",
+				service.Name,
+				service.Type,
+				service.Interface,
+				service.Host,
+				service.Domain,
+				service.IP,
+				service.Port,
+				service.Protocol,
 			)
-			for _, infoField := range entry.InfoFields {
-				fmt.Printf("    %v\n", infoField)
-			}
 		}
 	},
 }

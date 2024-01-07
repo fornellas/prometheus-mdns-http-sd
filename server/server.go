@@ -3,7 +3,6 @@ package server
 import (
 	"encoding/json"
 	"fmt"
-	"net"
 	"net/http"
 	"time"
 
@@ -22,10 +21,18 @@ func NewServer(
 	service string,
 	domain string,
 	timeout time.Duration,
-	wantUnicastResponse bool,
 	disableIPv4 bool,
 	disableIPv6 bool,
 ) http.Server {
+	m := mdns.NewMDNS()
+
+	proto := mdns.ProtoAny
+	if lib.DisableIPv4 {
+		proto = mdns.ProtoInet6
+	}
+	if lib.DisableIPv6 {
+		proto = mdns.ProtoInet
+	}
 
 	serveMux := http.NewServeMux()
 	serveMux.HandleFunc("/targets", func(w http.ResponseWriter, req *http.Request) {
@@ -34,14 +41,12 @@ func NewServer(
 			return
 		}
 
-		entries, err := mdns.Query(
+		services, err := m.BrowseServices(
 			lib.InterfaceStr,
+			proto,
 			lib.Service,
 			lib.Domain,
 			lib.Timeout,
-			lib.WantUnicastResponse,
-			lib.DisableIPv4,
-			lib.DisableIPv6,
 		)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -50,29 +55,17 @@ func NewServer(
 		}
 
 		var targetsList []Targets
-		for _, entry := range entries {
-			var ip *net.IP
-			if entry.AddrV4 != nil {
-				ip = &entry.AddrV4
-			}
-			if entry.AddrV6 != nil {
-				ip = &entry.AddrV6
-			}
-			if ip == nil {
-				w.WriteHeader(http.StatusInternalServerError)
-				fmt.Fprintf(w, "Discovered service has no IP: %v", entry)
-				return
-			}
-
+		for _, service := range services {
 			targetsList = append(targetsList, Targets{
 				Targets: []string{
-					fmt.Sprintf("%v:%d", ip, entry.Port),
+					fmt.Sprintf("%v:%d", service.IP, service.Port),
 				},
 				Labels: map[string]string{
-					"mdns_host": entry.Host,
-					"mdns_port": fmt.Sprintf("%d", entry.Port),
-					"mdns_name": entry.Name,
-					"mdns_info": entry.Info,
+					"mdns_host":         service.Host,
+					"mdns_port":         fmt.Sprintf("%d", service.Port),
+					"mdns_name":         service.Name,
+					"mdns_service_type": service.Type,
+					"mdns_interface":    service.Interface,
 				},
 			})
 		}
