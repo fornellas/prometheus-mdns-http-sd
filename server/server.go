@@ -24,8 +24,6 @@ func NewServer(
 	disableIPv4 bool,
 	disableIPv6 bool,
 ) http.Server {
-	m := mdns.NewMDNS()
-
 	proto := mdns.ProtoAny
 	if lib.DisableIPv4 {
 		proto = mdns.ProtoInet6
@@ -41,6 +39,7 @@ func NewServer(
 			return
 		}
 
+		m := mdns.NewMDNS()
 		services, err := m.BrowseServices(
 			lib.InterfaceStr,
 			proto,
