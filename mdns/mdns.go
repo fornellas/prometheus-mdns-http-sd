@@ -2,7 +2,6 @@ package mdns
 
 import (
 	"fmt"
-	"log"
 	"net"
 	"time"
 
@@ -66,23 +65,44 @@ func (p Proto) String() string {
 }
 
 type MDNS struct {
-	server *avahi.Server
+	dbusConn    *dbus.Conn
+	avahiServer *avahi.Server
 }
 
-func NewMDNS() MDNS {
-	var mdns MDNS
+func NewMDNS() (*MDNS, error) {
+	var m MDNS
+	var err error
 
-	conn, err := dbus.SystemBus()
+	m.dbusConn, err = dbus.SystemBus()
 	if err != nil {
-		log.Fatalf("Cannot get system bus: %v", err)
+		return nil, err
 	}
 
-	mdns.server, err = avahi.ServerNew(conn)
+	m.avahiServer, err = avahi.ServerNew(m.dbusConn)
 	if err != nil {
-		log.Fatalf("Avahi new failed: %v", err)
+		return nil, err
 	}
 
-	return mdns
+	return &m, nil
+}
+
+func (m *MDNS) Close() error {
+	m.avahiServer.Close()
+	return m.dbusConn.Close()
+}
+
+func getIfaceIdxFromName(ifaceName string) (int32, error) {
+	var iface int32
+	iface = avahi.InterfaceUnspec
+	if ifaceName != AnyIface {
+		var err error
+		netIface, err := net.InterfaceByName(ifaceName)
+		if err != nil {
+			return 0, err
+		}
+		iface = int32(netIface.Index)
+	}
+	return iface, nil
 }
 
 func (m *MDNS) BrowseServices(
@@ -93,17 +113,12 @@ func (m *MDNS) BrowseServices(
 	timeout time.Duration,
 ) ([]Service, error) {
 	var iface int32
-	iface = avahi.InterfaceUnspec
-	if ifaceName != AnyIface {
-		var err error
-		netIface, err := net.InterfaceByName(ifaceName)
-		if err != nil {
-			return nil, err
-		}
-		iface = int32(netIface.Index)
+	iface, err := getIfaceIdxFromName(ifaceName)
+	if err != nil {
+		return nil, err
 	}
 
-	sb, err := m.server.ServiceBrowserNew(
+	sb, err := m.avahiServer.ServiceBrowserNew(
 		iface,
 		int32(proto),
 		serviceType,
@@ -121,7 +136,7 @@ func (m *MDNS) BrowseServices(
 	for {
 		select {
 		case avahiService = <-sb.AddChannel:
-			avahiService, err = m.server.ResolveService(
+			avahiService, err = m.avahiServer.ResolveService(
 				avahiService.Interface,
 				avahiService.Protocol,
 				avahiService.Name,
@@ -149,4 +164,34 @@ func (m *MDNS) BrowseServices(
 	}
 
 	return services, nil
+}
+
+func (m *MDNS) ResolveHost(
+	host string,
+	ifaceName string,
+	proto Proto,
+) (net.IP, error) {
+	var iface int32
+	iface, err := getIfaceIdxFromName(ifaceName)
+	if err != nil {
+		return nil, err
+	}
+
+	hostName, err := m.avahiServer.ResolveHostName(
+		iface,
+		int32(proto),
+		host,
+		int32(proto),
+		0,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	ip := net.ParseIP(hostName.Address)
+	if ip == nil {
+		return nil, fmt.Errorf("invalid IP: %v", hostName.Address)
+	}
+
+	return ip, nil
 }

@@ -15,7 +15,11 @@ var Cmd = &cobra.Command{
 	Short: "Runs mDNS discovery and print results.",
 	Args:  cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
-		m := mdns.NewMDNS()
+		m, err := mdns.NewMDNS()
+		if err != nil {
+			logrus.Fatalf("Error getting mDNS client: %v", err)
+		}
+		defer m.Close()
 
 		proto := mdns.ProtoAny
 		if lib.DisableIPv4 {

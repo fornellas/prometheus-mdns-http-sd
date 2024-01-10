@@ -39,7 +39,14 @@ func NewServer(
 			return
 		}
 
-		m := mdns.NewMDNS()
+		m, err := mdns.NewMDNS()
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprintf(w, "Error querying mDNS: %v", err)
+			return
+		}
+		defer m.Close()
+
 		services, err := m.BrowseServices(
 			lib.InterfaceStr,
 			proto,
