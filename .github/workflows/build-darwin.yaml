@@ -68,15 +68,6 @@ jobs:
           name: prometheus-mdns-http-sd.darwin.${{ inputs.GOARCH }}.gz
           path: prometheus-mdns-http-sd.darwin.${{ inputs.GOARCH }}.gz
           if-no-files-found: error
-      # Coveralls
-      - name: Coveralls
-        uses: coverallsapp/github-action@v2
-        if: ${{ inputs.GOARCH == 'amd64' }}
-        with:
-          file: cover.lcov
-          flag-name: darwin.${{ inputs.GOARCH }}
-          parallel: true
-          allow-empty: true
       # Clean
       - name: Clean
         run: gmake clean

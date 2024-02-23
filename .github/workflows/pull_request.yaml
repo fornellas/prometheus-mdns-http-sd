@@ -34,18 +34,3 @@ jobs:
     with:
       GOARCH: arm64
     secrets: inherit
-  coveralls:
-    needs:
-      - linux_386
-      - linux_amd64
-      - linux_arm
-      - linux_arm64
-      - darwin_amd64
-      # - darwin_arm64
-    if: ${{ always() }}
-    runs-on: ubuntu-latest
-    steps:
-    - name: Coveralls Finished
-      uses: coverallsapp/github-action@v1
-      with:
-        parallel-finished: true
